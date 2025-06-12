@@ -4,14 +4,324 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>C-WAGS Trial Management System</title>
-    
-    <!-- Basic CSS - inline for debugging -->
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C-WAGS Trial Management System</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/auth.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #7c3aed;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --error-color: #dc2626;
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Authentication Modal Styles */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .auth-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            margin: 1rem;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header h2 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .auth-header p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background: #6d28d9;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background: #047857;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+        }
+
+        .btn-warning:hover {
+            background: #b45309;
+        }
+
+        .auth-error {
+            background: #fef2f2;
+            color: var(--error-color);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #fecaca;
+        }
+
+        .auth-success {
+            background: #f0fdf4;
+            color: var(--success-color);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* Main App Styles */
+        .main-app {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .app-header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-header h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .app-header .btn {
+            width: auto;
+            margin: 0;
+            margin-left: 15px;
+        }
+
+        .main-nav {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            color: var(--text-color);
+        }
+
+        .nav-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .nav-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .module {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .module-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .module-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            color: var(--text-color);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .dashboard-module {
+            padding: 2rem;
+        }
+
+        .dashboard-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .main-nav {
+                padding: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .auth-content {
+                margin: 0.5rem;
+                padding: 1.5rem;
+            }
+
+            .grid-4 {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Authentication Modal -->
@@ -51,7 +361,7 @@
             </div>
             <div>
                 <span id="user-name">System Administrator</span>
-                <button id="logout-btn" class="btn" style="width: auto; margin-left: 15px;">Logout</button>
+                <button id="logout-btn" class="btn">Logout</button>
             </div>
         </header>
 
@@ -66,569 +376,543 @@
 
         <main class="main-content">
             <div id="module-container">
-                <div class="dashboard-module">
-                    <h2>Welcome to C-WAGS Trial Management System</h2>
-                    <p>System is running successfully! 🎉</p>
-                    <div style="margin-top: 20px;">
-                        <h3>System Status:</h3>
-                        <ul>
-                            <li>✅ Authentication: Working</li>
-                            <li>✅ Data Storage: Available</li>
-                            <li>✅ User Interface: Loaded</li>
-                            <li>✅ Core Functions: Ready</li>
-                        </ul>
-                    </div>
-                </div>
+                <!-- Content will be loaded here -->
             </div>
         </main>
     </div>
 
-  <script>
-    // Load core modules first
-    const loadScript = (src) => {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-    };
+    <script>
+        // Data Manager Class
+        class SimpleDataManager {
+            static saveData(key, data) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(data));
+                    return true;
+                } catch (error) {
+                    console.error('Error saving data:', error);
+                    return false;
+                }
+            }
 
-  <!-- Replace your entire <script> section at the bottom of index.html with this: -->
+            static getData(key, defaultValue = null) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : defaultValue;
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    return defaultValue;
+                }
+            }
 
+            static getSystemStats() {
+                const trials = this.getData('cwags_trials', []);
+                const entries = this.getData('cwags_entries', []);
+                const users = this.getData('cwags_users', []);
+                
+                return {
+                    totalTrials: trials.length,
+                    activeTrials: trials.filter(t => t.status === 'active' || !t.status).length,
+                    pendingTrials: trials.filter(t => t.status === 'pending').length,
+                    totalEntries: entries.length,
+                    entriesThisMonth: 0,
+                    confirmedEntries: entries.filter(e => e.status === 'confirmed').length,
+                    totalUsers: users.length,
+                    activeUsers: users.filter(u => u.isActive).length,
+                    dataSize: this.calculateDataSize()
+                };
+            }
 
-// Simple working authentication - embedded in HTML
-class SimpleDataManager {
-    static saveData(key, data) {
-        try {
-            localStorage.setItem(key, JSON.stringify(data));
-            return true;
-        } catch (error) {
-            console.error('Error saving data:', error);
-            return false;
-        }
-    }
+            static calculateDataSize() {
+                let totalSize = 0;
+                for (let key in localStorage) {
+                    if (key.startsWith('cwags_')) {
+                        totalSize += localStorage[key].length;
+                    }
+                }
+                return totalSize;
+            }
 
-    static getData(key, defaultValue = null) {
-        try {
-            const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : defaultValue;
-        } catch (error) {
-            console.error('Error loading data:', error);
-            return defaultValue;
-        }
-    }
-
-    static getSystemStats() {
-        const trials = this.getData('cwags_trials', []);
-        const entries = this.getData('cwags_entries', []);
-        const users = this.getData('cwags_users', []);
-        
-        return {
-            totalTrials: trials.length,
-            activeTrials: trials.filter(t => t.status === 'active' || !t.status).length,
-            pendingTrials: trials.filter(t => t.status === 'pending').length,
-            totalEntries: entries.length,
-            entriesThisMonth: 0,
-            confirmedEntries: entries.filter(e => e.status === 'confirmed').length,
-            totalUsers: users.length,
-            activeUsers: users.filter(u => u.isActive).length,
-            dataSize: this.calculateDataSize()
-        };
-    }
-
-    static calculateDataSize() {
-        let totalSize = 0;
-        for (let key in localStorage) {
-            if (key.startsWith('cwags_')) {
-                totalSize += localStorage[key].length;
+            static formatBytes(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
         }
-        return totalSize;
-    }
 
-    static formatBytes(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-}
+        // Authentication Class
+        class SimpleAuth {
+            static currentUser = null;
 
-class SimpleAuth {
-    static currentUser = null;
+            static init() {
+                console.log('🔐 Auth system initialized');
+                this.loadDefaultUsers();
+                this.setupEventListeners();
+            }
 
-    static init() {
-        console.log('🔐 Auth system initialized');
-        this.loadDefaultUsers();
-        this.setupEventListeners();
-    }
+            static loadDefaultUsers() {
+                let users = SimpleDataManager.getData('cwags_users', []);
+                
+                if (users.length === 0) {
+                    const defaultAdmin = {
+                        id: 'admin-001',
+                        email: 'admin@cwags.org',
+                        password: 'admin123',
+                        firstName: 'System',
+                        lastName: 'Administrator',
+                        role: 'admin',
+                        isActive: true,
+                        permissions: ['all']
+                    };
+                    users.push(defaultAdmin);
+                    SimpleDataManager.saveData('cwags_users', users);
+                    console.log('✅ Default admin created');
+                }
+            }
 
-    static loadDefaultUsers() {
-        let users = SimpleDataManager.getData('cwags_users', []);
-        
-        if (users.length === 0) {
-            const defaultAdmin = {
-                id: 'admin-001',
-                email: 'admin@cwags.org',
-                password: 'admin123', // Plain text for demo
-                firstName: 'System',
-                lastName: 'Administrator',
-                role: 'admin',
-                isActive: true,
-                permissions: ['all']
-            };
-            users.push(defaultAdmin);
-            SimpleDataManager.saveData('cwags_users', users);
-            console.log('✅ Default admin created');
-        }
-    }
+            static setupEventListeners() {
+                const loginForm = document.getElementById('login-form-element');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleLogin();
+                    });
+                }
 
-    static setupEventListeners() {
-        const loginForm = document.getElementById('login-form-element');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleLogin();
-            });
-        }
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        this.logout();
+                    });
+                }
+            }
 
-        const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                this.logout();
-            });
-        }
-    }
+            static handleLogin() {
+                const email = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value;
 
-    static handleLogin() {
-        const email = document.getElementById('login-email').value.trim();
-        const password = document.getElementById('login-password').value;
+                console.log('🔑 Attempting login:', email);
 
-        console.log('🔑 Attempting login:', email);
+                if (!email || !password) {
+                    this.showMessage('Please fill in all fields', 'error');
+                    return;
+                }
 
-        if (!email || !password) {
-            this.showMessage('Please fill in all fields', 'error');
-            return;
-        }
+                const users = SimpleDataManager.getData('cwags_users', []);
+                const user = users.find(u => 
+                    u.email.toLowerCase() === email.toLowerCase() && 
+                    u.password === password &&
+                    u.isActive
+                );
 
-        const users = SimpleDataManager.getData('cwags_users', []);
-        const user = users.find(u => 
-            u.email.toLowerCase() === email.toLowerCase() && 
-            u.password === password &&
-            u.isActive
-        );
+                if (user) {
+                    console.log('✅ Login successful:', user);
+                    this.currentUser = user;
+                    localStorage.setItem('cwags_current_user', JSON.stringify(user));
+                    
+                    this.showMessage('Login successful!', 'success');
+                    
+                    setTimeout(() => {
+                        showMainApp();
+                        this.updateUserDisplay();
+                    }, 1000);
+                } else {
+                    console.log('❌ Login failed for:', email);
+                    this.showMessage('Invalid email or password', 'error');
+                }
+            }
 
-        if (user) {
-            console.log('✅ Login successful:', user);
-            this.currentUser = user;
-            localStorage.setItem('cwags_current_user', JSON.stringify(user));
-            
-            this.showMessage('Login successful!', 'success');
-            
-            setTimeout(() => {
-                showMainApp();
-                this.updateUserDisplay();
-            }, 1000);
-        } else {
-            console.log('❌ Login failed for:', email);
-            this.showMessage('Invalid email or password', 'error');
-        }
-    }
+            static logout() {
+                this.currentUser = null;
+                localStorage.removeItem('cwags_current_user');
+                showAuthModal();
+            }
 
-    static logout() {
-        this.currentUser = null;
-        localStorage.removeItem('cwags_current_user');
-        showAuthModal();
-    }
+            static isLoggedIn() {
+                if (this.currentUser) return true;
+                
+                const stored = localStorage.getItem('cwags_current_user');
+                if (stored) {
+                    this.currentUser = JSON.parse(stored);
+                    return true;
+                }
+                return false;
+            }
 
-    static isLoggedIn() {
-        if (this.currentUser) return true;
-        
-        const stored = localStorage.getItem('cwags_current_user');
-        if (stored) {
-            this.currentUser = JSON.parse(stored);
-            return true;
-        }
-        return false;
-    }
+            static getCurrentUser() {
+                if (!this.currentUser) {
+                    const stored = localStorage.getItem('cwags_current_user');
+                    if (stored) {
+                        this.currentUser = JSON.parse(stored);
+                    }
+                }
+                return this.currentUser;
+            }
 
-    static getCurrentUser() {
-        if (!this.currentUser) {
-            const stored = localStorage.getItem('cwags_current_user');
-            if (stored) {
-                this.currentUser = JSON.parse(stored);
+            static updateUserDisplay() {
+                const user = this.getCurrentUser();
+                if (user) {
+                    const userNameEl = document.getElementById('user-name');
+                    if (userNameEl) {
+                        userNameEl.textContent = `${user.firstName} ${user.lastName}`;
+                    }
+                }
+            }
+
+            static showMessage(message, type) {
+                const messageArea = document.getElementById('message-area');
+                if (messageArea) {
+                    const className = type === 'error' ? 'auth-error' : 'auth-success';
+                    messageArea.innerHTML = `<div class="${className}">${message}</div>`;
+                    
+                    if (type === 'success') {
+                        setTimeout(() => {
+                            messageArea.innerHTML = '';
+                        }, 3000);
+                    }
+                }
             }
         }
-        return this.currentUser;
-    }
 
-    static updateUserDisplay() {
-        const user = this.getCurrentUser();
-        if (user) {
-            const userNameEl = document.getElementById('user-name');
-            if (userNameEl) {
-                userNameEl.textContent = `${user.firstName} ${user.lastName}`;
+        // Main Application Class
+        class WorkingApp {
+            static currentModule = 'dashboard';
+
+            static init() {
+                console.log('🚀 Initializing C-WAGS System...');
+                
+                SimpleAuth.init();
+                this.setupEventListeners();
+                this.checkLoginStatus();
             }
-        }
-    }
 
-    static showMessage(message, type) {
-        const messageArea = document.getElementById('message-area');
-        if (messageArea) {
-            const className = type === 'error' ? 'auth-error' : 'auth-success';
-            messageArea.innerHTML = `<div class="${className}">${message}</div>`;
-            
-            if (type === 'success') {
-                setTimeout(() => {
-                    messageArea.innerHTML = '';
-                }, 3000);
+            static setupEventListeners() {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.switchModule(e.target.dataset.module);
+                        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                    });
+                });
             }
-        }
-    }
-}
 
-// Main App Controller
-class WorkingApp {
-    static currentModule = 'dashboard';
+            static checkLoginStatus() {
+                if (SimpleAuth.isLoggedIn()) {
+                    showMainApp();
+                    SimpleAuth.updateUserDisplay();
+                    this.loadDashboard();
+                } else {
+                    showAuthModal();
+                }
+            }
 
-    static init() {
-        console.log('🚀 Initializing Working C-WAGS System...');
-        
-        SimpleAuth.init();
-        this.setupEventListeners();
-        this.checkLoginStatus();
-    }
+            static switchModule(moduleName) {
+                this.currentModule = moduleName;
+                
+                switch(moduleName) {
+                    case 'dashboard':
+                        this.loadDashboard();
+                        break;
+                    case 'trial-setup':
+                        this.loadTrialSetup();
+                        break;
+                    case 'entries':
+                        this.loadEntryManagement();
+                        break;
+                    case 'paperwork':
+                        this.loadPaperworkGeneration();
+                        break;
+                    case 'scoring':
+                        this.loadScoringSystem();
+                        break;
+                    case 'admin':
+                        this.loadAdminPanel();
+                        break;
+                    default:
+                        this.loadDashboard();
+                }
+            }
 
-    static setupEventListeners() {
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.switchModule(e.target.dataset.module);
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-            });
-        });
-    }
+            static loadDashboard() {
+                const container = document.getElementById('module-container');
+                const stats = SimpleDataManager.getSystemStats();
+                
+                container.innerHTML = `
+                    <div class="dashboard-module">
+                        <div class="module-header">
+                            <h2>📊 Dashboard</h2>
+                            <p>Welcome to the C-WAGS Trial Management System</p>
+                        </div>
 
-    static checkLoginStatus() {
-        if (SimpleAuth.isLoggedIn()) {
-            showMainApp();
-            SimpleAuth.updateUserDisplay();
-            this.loadDashboard();
-        } else {
-            showAuthModal();
-        }
-    }
+                        <div class="dashboard-content">
+                            <!-- Quick Stats -->
+                            <div class="grid grid-4" style="margin-bottom: 30px;">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">🎯 Total Trials</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <div style="font-size: 2.5rem; font-weight: bold; color: var(--primary-color); text-align: center;">
+                                            ${stats.totalTrials}
+                                        </div>
+                                        <div style="text-align: center; color: #666; margin-top: 10px;">
+                                            <div>Active: ${stats.activeTrials}</div>
+                                            <div>Pending: ${stats.pendingTrials}</div>
+                                        </div>
+                                    </div>
+                                </div>
 
-    static switchModule(moduleName) {
-        this.currentModule = moduleName;
-        
-        switch(moduleName) {
-            case 'dashboard':
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">📝 Total Entries</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <div style="font-size: 2.5rem; font-weight: bold; color: var(--secondary-color); text-align: center;">
+                                            ${stats.totalEntries}
+                                        </div>
+                                        <div style="text-align: center; color: #666; margin-top: 10px;">
+                                            <div>This Month: ${stats.entriesThisMonth}</div>
+                                            <div>Confirmed: ${stats.confirmedEntries}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">👥 Users</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <div style="font-size: 2.5rem; font-weight: bold; color: var(--success-color); text-align: center;">
+                                            ${stats.totalUsers}
+                                        </div>
+                                        <div style="text-align: center; color: #666; margin-top: 10px;">
+                                            <div>Active: ${stats.activeUsers}</div>
+                                            <div>System: ✅ Operational</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">💾 Storage</h3>
+                                    </div>
+                                    <div class="card-content">
+                                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--warning-color); text-align: center;">
+                                            ${SimpleDataManager.formatBytes(stats.dataSize)}
+                                        </div>
+                                        <div style="text-align: center; color: #666; margin-top: 10px;">
+                                            <div>Status: ✅ Healthy</div>
+                                            <div>Records: ${stats.totalTrials + stats.totalEntries}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">🚀 Quick Actions</h3>
+                                </div>
+                                <div class="card-content">
+                                    <div class="grid grid-3">
+                                        <button class="btn btn-primary" onclick="WorkingApp.switchModule('trial-setup')">
+                                            🎯 Create New Trial
+                                        </button>
+                                        <button class="btn btn-secondary" onclick="WorkingApp.switchModule('entries')">
+                                            📝 Manage Entries
+                                        </button>
+                                        <button class="btn btn-success" onclick="WorkingApp.switchModule('paperwork')">
+                                            📄 Generate Forms
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- System Status -->
+                            <div class="card" style="margin-top: 20px;">
+                                <div class="card-header">
+                                    <h3 class="card-title">📋 System Status</h3>
+                                </div>
+                                <div class="card-content">
+                                    <div class="grid grid-2">
+                                        <div>
+                                            <h4>✅ System Health</h4>
+                                            <ul>
+                                                <li>Authentication: ✅ Working</li>
+                                                <li>Data Storage: ✅ Available</li>
+                                                <li>User Interface: ✅ Loaded</li>
+                                                <li>Performance: ✅ Optimal</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h4>📊 Current Session</h4>
+                                            <ul>
+                                                <li>User: ${SimpleAuth.getCurrentUser()?.firstName || 'Guest'}</li>
+                                                <li>Role: ${SimpleAuth.getCurrentUser()?.role || 'None'}</li>
+                                                <li>Login Time: ${new Date().toLocaleTimeString()}</li>
+                                                <li>Status: ✅ Active</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            static loadTrialSetup() {
+                const container = document.getElementById('module-container');
+                container.innerHTML = `
+                    <div class="module">
+                        <div class="module-header">
+                            <h2>🎯 Trial Setup</h2>
+                            <p>Create and manage C-WAGS trials</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-content">
+                                <h3>🚧 Trial Setup Module</h3>
+                                <p>This advanced module will include:</p>
+                                <ul>
+                                    <li>✅ Complete trial creation wizard</li>
+                                    <li>✅ Venue and judge management</li>
+                                    <li>✅ Class scheduling and organization</li>
+                                    <li>✅ Entry deadline and limit management</li>
+                                    <li>✅ Trial approval workflow</li>
+                                </ul>
+                                <div style="margin-top: 20px;">
+                                    <button class="btn btn-primary" onclick="WorkingApp.createTestTrial()">
+                                        🧪 Create Test Trial
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            static loadEntryManagement() {
+                const container = document.getElementById('module-container');
+                container.innerHTML = `
+                    <div class="module">
+                        <div class="module-header">
+                            <h2>📝 Entry Management</h2>
+                            <p>Manage trial entries and registrations</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-content">
+                                <h3>🚧 Entry Management Module</h3>
+                                <p>Coming soon with comprehensive entry management features!</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            static loadPaperworkGeneration() {
+                const container = document.getElementById('module-container');
+                container.innerHTML = `
+                    <div class="module">
+                        <div class="module-header">
+                            <h2>📄 Paperwork Generation</h2>
+                            <p>Generate trial forms and documents</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-content">
+                                <h3>🚧 Paperwork Generation Module</h3>
+                                <p>Professional document generation system coming soon!</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            static loadScoringSystem() {
+                const container = document.getElementById('module-container');
+                container.innerHTML = `
+                    <div class="module">
+                        <div class="module-header">
+                            <h2>🏆 Scoring & Results</h2>
+                            <p>Digital scoring and results management</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-content">
+                                <h3>🚧 Scoring System Module</h3>
+                                <p>Advanced scoring capabilities coming soon!</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            static loadAdminPanel() {
+                const container = document.getElementById('module-container');
+                container.innerHTML = `
+                    <div class="module">
+                        <div class="module-header">
+                            <h2>⚙️ Admin Panel</h2>
+                            <p>System administration and user management</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-content">
+                                <h3>🚧 Administrative Panel</h3>
+                                <p>Complete system administration coming soon!</p>
+                                <div style="margin-top: 20px;">
+                                    <button class="btn btn-warning" onclick="WorkingApp.testSystem()">
+                                        🧪 Test System Functions
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            static createTestTrial() {
+                const testTrial = {
+                    id: 'trial-' + Date.now(),
+                    name: 'Test Trial ' + new Date().toLocaleDateString(),
+                    host: 'Test Host',
+                    date: new Date().toISOString(),
+                    status: 'active'
+                };
+                
+                const trials = SimpleDataManager.getData('cwags_trials', []);
+                trials.push(testTrial);
+                SimpleDataManager.saveData('cwags_trials', trials);
+                
+                alert('✅ Test trial created successfully!');
                 this.loadDashboard();
-                break;
-            case 'trial-setup':
-                this.loadTrialSetup();
-                break;
-            case 'entries':
-                this.loadEntryManagement();
-                break;
-            case 'paperwork':
-                this.loadPaperworkGeneration();
-                break;
-            case 'scoring':
-                this.loadScoringSystem();
-                break;
-            case 'admin':
-                this.loadAdminPanel();
-                break;
-            default:
-                this.loadDashboard();
+            }
+
+            static testSystem() {
+                alert('✅ System test completed! All functions working properly.');
+                console.log('System test results:', {
+                    auth: SimpleAuth.isLoggedIn(),
+                    data: SimpleDataManager.getSystemStats(),
+                    user: SimpleAuth.getCurrentUser()
+                });
+            }
         }
-    }
 
-    static loadDashboard() {
-        const container = document.getElementById('module-container');
-        const stats = SimpleDataManager.getSystemStats();
-        
-        container.innerHTML = `
-            <div class="dashboard-module">
-                <div class="module-header">
-                    <h2>📊 Dashboard</h2>
-                    <p>Welcome to the C-WAGS Trial Management System</p>
-                </div>
+        // Global functions
+        function showAuthModal() {
+            document.getElementById('auth-modal').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+        }
 
-                <div class="dashboard-content">
-                    <!-- Quick Stats -->
-                    <div class="grid grid-4" style="margin-bottom: 30px;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">🎯 Total Trials</h3>
-                            </div>
-                            <div class="card-content">
-                                <div style="font-size: 2.5rem; font-weight: bold; color: var(--primary-color); text-align: center;">
-                                    ${stats.totalTrials}
-                                </div>
-                                <div style="text-align: center; color: #666; margin-top: 10px;">
-                                    <div>Active: ${stats.activeTrials}</div>
-                                    <div>Pending: ${stats.pendingTrials}</div>
-                                </div>
-                            </div>
-                        </div>
+        function showMainApp() {
+            document.getElementById('auth-modal').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+        }
 
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">📝 Total Entries</h3>
-                            </div>
-                            <div class="card-content">
-                                <div style="font-size: 2.5rem; font-weight: bold; color: var(--secondary-color); text-align: center;">
-                                    ${stats.totalEntries}
-                                </div>
-                                <div style="text-align: center; color: #666; margin-top: 10px;">
-                                    <div>This Month: ${stats.entriesThisMonth}</div>
-                                    <div>Confirmed: ${stats.confirmedEntries}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">👥 Users</h3>
-                            </div>
-                            <div class="card-content">
-                                <div style="font-size: 2.5rem; font-weight: bold; color: var(--success-color); text-align: center;">
-                                    ${stats.totalUsers}
-                                </div>
-                                <div style="text-align: center; color: #666; margin-top: 10px;">
-                                    <div>Active: ${stats.activeUsers}</div>
-                                    <div>System: ✅ Operational</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">💾 Storage</h3>
-                            </div>
-                            <div class="card-content">
-                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--warning-color); text-align: center;">
-                                    ${SimpleDataManager.formatBytes(stats.dataSize)}
-                                </div>
-                                <div style="text-align: center; color: #666; margin-top: 10px;">
-                                    <div>Status: ✅ Healthy</div>
-                                    <div>Records: ${stats.totalTrials + stats.totalEntries}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">🚀 Quick Actions</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="grid grid-3">
-                                <button class="btn btn-primary" onclick="WorkingApp.switchModule('trial-setup')">
-                                    🎯 Create New Trial
-                                </button>
-                                <button class="btn btn-secondary" onclick="WorkingApp.switchModule('entries')">
-                                    📝 Manage Entries
-                                </button>
-                                <button class="btn btn-success" onclick="WorkingApp.switchModule('paperwork')">
-                                    📄 Generate Forms
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- System Status -->
-                    <div class="card" style="margin-top: 20px;">
-                        <div class="card-header">
-                            <h3 class="card-title">📋 System Status</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="grid grid-2">
-                                <div>
-                                    <h4>✅ System Health</h4>
-                                    <ul>
-                                        <li>Authentication: ✅ Working</li>
-                                        <li>Data Storage: ✅ Available</li>
-                                        <li>User Interface: ✅ Loaded</li>
-                                        <li>Performance: ✅ Optimal</li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4>📊 Current Session</h4>
-                                    <ul>
-                                        <li>User: ${SimpleAuth.getCurrentUser()?.firstName || 'Guest'}</li>
-                                        <li>Role: ${SimpleAuth.getCurrentUser()?.role || 'None'}</li>
-                                        <li>Login Time: ${new Date().toLocaleTimeString()}</li>
-                                        <li>Status: ✅ Active</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    static loadTrialSetup() {
-        const container = document.getElementById('module-container');
-        container.innerHTML = `
-            <div class="module">
-                <div class="module-header">
-                    <h2>🎯 Trial Setup</h2>
-                    <p>Create and manage C-WAGS trials</p>
-                </div>
-                <div class="card">
-                    <div class="card-content">
-                        <h3>🚧 Trial Setup Module</h3>
-                        <p>This advanced module will include:</p>
-                        <ul>
-                            <li>✅ Complete trial creation wizard</li>
-                            <li>✅ Venue and judge management</li>
-                            <li>✅ Class scheduling and organization</li>
-                            <li>✅ Entry deadline and limit management</li>
-                            <li>✅ Trial approval workflow</li>
-                        </ul>
-                        <div style="margin-top: 20px;">
-                            <button class="btn btn-primary" onclick="WorkingApp.createTestTrial()">
-                                🧪 Create Test Trial
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    static loadEntryManagement() {
-        const container = document.getElementById('module-container');
-        container.innerHTML = `
-            <div class="module">
-                <div class="module-header">
-                    <h2>📝 Entry Management</h2>
-                    <p>Manage trial entries and registrations</p>
-                </div>
-                <div class="card">
-                    <div class="card-content">
-                        <h3>🚧 Entry Management Module</h3>
-                        <p>Coming soon with comprehensive entry management features!</p>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    static loadPaperworkGeneration() {
-        const container = document.getElementById('module-container');
-        container.innerHTML = `
-            <div class="module">
-                <div class="module-header">
-                    <h2>📄 Paperwork Generation</h2>
-                    <p>Generate trial forms and documents</p>
-                </div>
-                <div class="card">
-                    <div class="card-content">
-                        <h3>🚧 Paperwork Generation Module</h3>
-                        <p>Professional document generation system coming soon!</p>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    static loadScoringSystem() {
-        const container = document.getElementById('module-container');
-        container.innerHTML = `
-            <div class="module">
-                <div class="module-header">
-                    <h2>🏆 Scoring & Results</h2>
-                    <p>Digital scoring and results management</p>
-                </div>
-                <div class="card">
-                    <div class="card-content">
-                        <h3>🚧 Scoring System Module</h3>
-                        <p>Advanced scoring capabilities coming soon!</p>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    static loadAdminPanel() {
-        const container = document.getElementById('module-container');
-        container.innerHTML = `
-            <div class="module">
-                <div class="module-header">
-                    <h2>⚙️ Admin Panel</h2>
-                    <p>System administration and user management</p>
-                </div>
-                <div class="card">
-                    <div class="card-content">
-                        <h3>🚧 Administrative Panel</h3>
-                        <p>Complete system administration coming soon!</p>
-                        <div style="margin-top: 20px;">
-                            <button class="btn btn-warning" onclick="WorkingApp.testSystem()">
-                                🧪 Test System Functions
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    static createTestTrial() {
-        const testTrial = {
-            id: 'trial-' + Date.now(),
-            name: 'Test Trial ' + new Date().toLocaleDateString(),
-            host: 'Test Host',
-            date: new Date().toISOString(),
-            status: 'active'
-        };
-        
-        const trials = SimpleDataManager.getData('cwags_trials', []);
-        trials.push(testTrial);
-        SimpleDataManager.saveData('cwags_trials', trials);
-        
-        alert('✅ Test trial created successfully!');
-        this.loadDashboard();
-    }
-
-    static testSystem() {
-        alert('✅ System test completed! All functions working properly.');
-        console.log('System test results:', {
-            auth: SimpleAuth.isLoggedIn(),
-            data: SimpleDataManager.getSystemStats(),
-            user: SimpleAuth.getCurrentUser()
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initializing C-WAGS Trial Management System...');
+            WorkingApp.init();
+            console.log('✅ System ready!');
         });
-    }
-}
-
-// Global functions
-function showAuthModal() {
-    document.getElementById('auth-modal').style.display = 'flex';
-    document.getElementById('main-app').style.display = 'none';
-}
-
-function showMainApp() {
-    document.getElementById('auth-modal').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-}
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Initializing C-WAGS Trial Management System...');
-    WorkingApp.init();
-    console.log('✅ System ready!');
-});
-</script>
+    </script>
 </body>
 </html>
-
