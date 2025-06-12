@@ -1,45 +1,77 @@
 // js/core/data-manager.js
 class DataManager {
+    static keys = {
+        TRIALS: 'cwags_trials',
+        ENTRIES: 'cwags_entries',
+        USERS: 'cwags_users',
+        SETTINGS: 'cwags_settings'
+    };
+
     static init() {
-        this.setupStorageKeys();
-        this.setupEventListeners();
-        this.migrateOldData();
+        console.log('🗄️ DataManager initialized');
+        this.validateStorage();
     }
 
-    static setupStorageKeys() {
-        this.keys = {
-            USERS: 'cwags_users',
-            TRIALS: 'cwags_trials',
-            ENTRIES: 'cwags_entries',
-            SCORES: 'cwags_scores',
-            SETTINGS: 'cwags_settings',
-            SESSION: 'cwags_session',
-            DOGS: 'cwags_dogs',
-            HANDLERS: 'cwags_handlers'
-        };
+    static validateStorage() {
+        try {
+            const testKey = 'cwags_test';
+            localStorage.setItem(testKey, 'test');
+            localStorage.removeItem(testKey);
+            return true;
+        } catch (error) {
+            console.error('LocalStorage not available:', error);
+            return false;
+        }
     }
 
-    static setupEventListeners() {
-        // Listen for storage changes from other tabs
-        window.addEventListener('storage', (e) => {
-            if (e.key && e.key.startsWith('cwags_')) {
-                this.handleStorageChange(e);
-            }
-        });
+    // ===================
+    // CORE DATA OPERATIONS
+    // ===================
 
-        // Auto-save on page unload
-        window.addEventListener('beforeunload', () => {
-            this.saveAllPendingData();
-        });
+    static saveData(key, data) {
+        try {
+            const jsonData = JSON.stringify(data);
+            localStorage.setItem(key, jsonData);
+            
+            // Dispatch data change event
+            window.dispatchEvent(new CustomEvent('cwagsDataChanged', {
+                detail: { key, action: 'save', timestamp: new Date().toISOString() }
+            }));
+            
+            return true;
+        } catch (error) {
+            console.error('Error saving data:', error);
+            return false;
+        }
     }
 
-    static handleStorageChange(event) {
-        // Handle data changes from other browser tabs
-        console.log('Storage changed:', event.key);
-        // Emit custom event for modules to listen to
-        window.dispatchEvent(new CustomEvent('cwagsDataChanged', {
-            detail: { key: event.key, newValue: event.newValue }
-        }));
+    static getData(key, defaultValue = null) {
+        try {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : defaultValue;
+        } catch (error) {
+            console.error('Error loading data:', error);
+            return defaultValue;
+        }
+    }
+
+    static deleteData(key) {
+        try {
+            localStorage.removeItem(key);
+            
+            window.dispatchEvent(new CustomEvent('cwagsDataChanged', {
+                detail: { key, action: 'delete', timestamp: new Date().toISOString() }
+            }));
+            
+            return true;
+        } catch (error) {
+            console.error('Error deleting data:', error);
+            return false;
+        }
+    }
+
+    static generateId(prefix = 'cwags') {
+        return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
 
     // ===================
@@ -62,6 +94,7 @@ class DataManager {
         if (!trial.id) {
             trial.id = this.generateId('trial');
             trial.createdAt = trial.updatedAt;
+            trial.status = trial.status || 'draft';
             trials.push(trial);
         } else {
             const index = trials.findIndex(t => t.id === trial.id);
@@ -80,9 +113,8 @@ class DataManager {
         const trials = this.getTrials();
         const filteredTrials = trials.filter(trial => trial.id !== trialId);
         
-        // Also delete related entries and scores
+        // Also delete related entries
         this.deleteTrialEntries(trialId);
-        this.deleteTrialScores(trialId);
         
         this.saveData(this.keys.TRIALS, filteredTrials);
         return true;
@@ -123,6 +155,7 @@ class DataManager {
         if (!entry.id) {
             entry.id = this.generateId('entry');
             entry.createdAt = entry.updatedAt;
+            entry.status = entry.status || 'draft';
             entries.push(entry);
         } else {
             const index = entries.findIndex(e => e.id === entry.id);
@@ -151,136 +184,28 @@ class DataManager {
         return true;
     }
 
-    static getEntriesByHandler(handlerName) {
-        const entries = this.getEntries();
-        return entries.filter(entry => 
-            entry.handlerName.toLowerCase().includes(handlerName.toLowerCase())
-        );
-    }
-
-    static canEditEntry(entryId) {
-        const entry = this.getEntry(entryId);
-        if (!entry) return false;
-        
-        const trial = this.getTrial(entry.trialId);
-        if (!trial) return false;
-        
-        const cutoffTime = new Date(trial.date);
-        cutoffTime.setHours(cutoffTime.getHours() - 24); // 24 hours before
-        
-        return new Date() < cutoffTime;
-    }
-
     // ===================
-    // SCORING MANAGEMENT
+    // SETTINGS MANAGEMENT
     // ===================
 
-    static getScores() {
-        return this.getData(this.keys.SCORES, []);
+    static getSetting(key, defaultValue = null) {
+        const settings = this.getData(this.keys.SETTINGS, {});
+        return settings[key] !== undefined ? settings[key] : defaultValue;
     }
 
-    static getTrialScores(trialId) {
-        const scores = this.getScores();
-        return scores.filter(score => score.trialId === trialId);
-    }
-
-    static getScoresForEntry(entryId) {
-        const scores = this.getScores();
-        return scores.filter(score => score.entryId === entryId);
-    }
-
-    static saveScore(score) {
-        const scores = this.getScores();
-        score.updatedAt = new Date().toISOString();
-        
-        if (!score.id) {
-            score.id = this.generateId('score');
-            score.createdAt = score.updatedAt;
-            scores.push(score);
-        } else {
-            const index = scores.findIndex(s => s.id === score.id);
-            if (index >= 0) {
-                scores[index] = { ...scores[index], ...score };
-            } else {
-                scores.push(score);
-            }
-        }
-        
-        this.saveData(this.keys.SCORES, scores);
-        return score;
-    }
-
-    static deleteTrialScores(trialId) {
-        const scores = this.getScores();
-        const filteredScores = scores.filter(score => score.trialId !== trialId);
-        this.saveData(this.keys.SCORES, filteredScores);
+    static saveSetting(key, value) {
+        const settings = this.getData(this.keys.SETTINGS, {});
+        settings[key] = value;
+        settings.updatedAt = new Date().toISOString();
+        this.saveData(this.keys.SETTINGS, settings);
         return true;
     }
 
-    // ===================
-    // DOG/HANDLER DATA
-    // ===================
-
-    static getDogs() {
-        return this.getData(this.keys.DOGS, []);
-    }
-
-    static getDog(registrationNumber) {
-        const dogs = this.getDogs();
-        return dogs.find(dog => dog.registrationNumber === registrationNumber);
-    }
-
-    static saveDog(dog) {
-        const dogs = this.getDogs();
-        dog.updatedAt = new Date().toISOString();
-        
-        if (!dog.id) {
-            dog.id = this.generateId('dog');
-            dog.createdAt = dog.updatedAt;
-            dogs.push(dog);
-        } else {
-            const index = dogs.findIndex(d => d.id === dog.id);
-            if (index >= 0) {
-                dogs[index] = { ...dogs[index], ...dog };
-            } else {
-                dogs.push(dog);
-            }
-        }
-        
-        this.saveData(this.keys.DOGS, dogs);
-        return dog;
-    }
-
-    static getHandlers() {
-        return this.getData(this.keys.HANDLERS, []);
-    }
-
-    static getHandler(handlerName) {
-        const handlers = this.getHandlers();
-        return handlers.find(handler => 
-            handler.name.toLowerCase() === handlerName.toLowerCase()
-        );
-    }
-
-    static saveHandler(handler) {
-        const handlers = this.getHandlers();
-        handler.updatedAt = new Date().toISOString();
-        
-        if (!handler.id) {
-            handler.id = this.generateId('handler');
-            handler.createdAt = handler.updatedAt;
-            handlers.push(handler);
-        } else {
-            const index = handlers.findIndex(h => h.id === handler.id);
-            if (index >= 0) {
-                handlers[index] = { ...handlers[index], ...handler };
-            } else {
-                handlers.push(handler);
-            }
-        }
-        
-        this.saveData(this.keys.HANDLERS, handlers);
-        return handler;
+    static deleteSetting(key) {
+        const settings = this.getData(this.keys.SETTINGS, {});
+        delete settings[key];
+        this.saveData(this.keys.SETTINGS, settings);
+        return true;
     }
 
     // ===================
@@ -294,8 +219,8 @@ class DataManager {
         return trials.filter(trial => 
             trial.name.toLowerCase().includes(searchLower) ||
             trial.host.toLowerCase().includes(searchLower) ||
-            trial.location.toLowerCase().includes(searchLower) ||
-            trial.judges.some(judge => judge.toLowerCase().includes(searchLower))
+            (trial.venue && trial.venue.city && trial.venue.city.toLowerCase().includes(searchLower)) ||
+            (trial.judges && trial.judges.some(judge => judge.name && judge.name.toLowerCase().includes(searchLower)))
         );
     }
 
@@ -306,108 +231,100 @@ class DataManager {
         return entries.filter(entry => 
             entry.handlerName.toLowerCase().includes(searchLower) ||
             entry.dogName.toLowerCase().includes(searchLower) ||
-            entry.registrationNumber.toLowerCase().includes(searchLower)
+            entry.handlerEmail.toLowerCase().includes(searchLower)
         );
     }
 
-    static getTrialStatistics(trialId) {
-        const entries = this.getTrialEntries(trialId);
-        const scores = this.getTrialScores(trialId);
+    // ===================
+    // STATISTICS & REPORTING
+    // ===================
+
+    static getSystemStats() {
+        const trials = this.getTrials();
+        const entries = this.getEntries();
+        const users = this.getData(this.keys.USERS, []);
+        
+        const now = new Date();
+        const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const thisYear = new Date(now.getFullYear(), 0, 1);
         
         return {
+            totalTrials: trials.length,
+            activeTrials: trials.filter(t => t.status === 'active' || !t.status).length,
+            pendingTrials: trials.filter(t => t.status === 'pending').length,
+            completedTrials: trials.filter(t => t.status === 'completed').length,
+            
             totalEntries: entries.length,
-            regularEntries: entries.filter(e => e.entryType !== 'feo').length,
-            feoEntries: entries.filter(e => e.entryType === 'feo').length,
-            uniqueHandlers: new Set(entries.map(e => e.handlerName)).size,
-            uniqueDogs: new Set(entries.map(e => e.registrationNumber)).size,
-            completedScores: scores.length,
-            averageScore: this.calculateAverageScore(scores),
-            qualificationRate: this.calculateQualificationRate(scores)
+            entriesThisMonth: entries.filter(e => new Date(e.createdAt) >= thisMonth).length,
+            entriesThisYear: entries.filter(e => new Date(e.createdAt) >= thisYear).length,
+            confirmedEntries: entries.filter(e => e.status === 'confirmed').length,
+            
+            totalUsers: users.length,
+            activeUsers: users.filter(u => u.isActive).length,
+            
+            dataSize: this.calculateDataSize(),
+            lastBackup: this.getSetting('last_backup_date'),
+            systemHealth: this.checkSystemHealth()
         };
     }
 
-    static calculateAverageScore(scores) {
-        const validScores = scores.filter(s => s.totalScore && !isNaN(s.totalScore));
-        if (validScores.length === 0) return 0;
-        
-        const sum = validScores.reduce((acc, score) => acc + score.totalScore, 0);
-        return Math.round(sum / validScores.length * 100) / 100;
+    static calculateDataSize() {
+        let totalSize = 0;
+        for (let key in localStorage) {
+            if (key.startsWith('cwags_')) {
+                totalSize += localStorage[key].length;
+            }
+        }
+        return totalSize;
     }
 
-    static calculateQualificationRate(scores) {
-        const validScores = scores.filter(s => s.qualified !== undefined);
-        if (validScores.length === 0) return 0;
-        
-        const qualified = validScores.filter(s => s.qualified).length;
-        return Math.round(qualified / validScores.length * 100);
-    }
-
-    // ===================
-    // SETTINGS MANAGEMENT
-    // ===================
-
-    static getSettings() {
-        return this.getData(this.keys.SETTINGS, this.getDefaultSettings());
-    }
-
-    static getSetting(key) {
-        const settings = this.getSettings();
-        return settings[key];
-    }
-
-    static saveSetting(key, value) {
-        const settings = this.getSettings();
-        settings[key] = value;
-        settings.updatedAt = new Date().toISOString();
-        this.saveData(this.keys.SETTINGS, settings);
-        return value;
-    }
-
-    static getDefaultSettings() {
-        return {
-            organization: 'C-WAGS',
-            defaultJumpHeights: ['8', '12', '16', '20', '24'],
-            defaultClasses: [
-                { name: 'Level 1', rounds: ['CTH', 'FFF', 'WA'] },
-                { name: 'Level 2', rounds: ['CTH2', 'FFF2', 'WA2'] },
-                { name: 'Video Level 1', rounds: ['Video'] }
-            ],
-            scoringOptions: {
-                qualifyingPercentage: 70,
-                useColorCoding: true,
-                autoCalculate: true
-            },
-            printOptions: {
-                includeInstructions: true,
-                autoNumbering: true,
-                colorCoding: true
-            },
-            notifications: {
-                entryConfirmations: true,
-                scoreSubmissions: true,
-                trialUpdates: true
-            },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+    static checkSystemHealth() {
+        const stats = {
+            storage: 'healthy',
+            data: 'healthy',
+            performance: 'healthy'
         };
+        
+        const dataSize = this.calculateDataSize();
+        const storageLimit = 5 * 1024 * 1024; // 5MB estimate
+        
+        if (dataSize > storageLimit * 0.8) {
+            stats.storage = 'warning';
+        }
+        
+        try {
+            const trials = this.getTrials();
+            const entries = this.getEntries();
+            
+            // Check for data integrity issues
+            let hasIssues = false;
+            entries.forEach(entry => {
+                if (!trials.find(t => t.id === entry.trialId)) {
+                    hasIssues = true;
+                }
+            });
+            
+            if (hasIssues) {
+                stats.data = 'warning';
+            }
+        } catch (error) {
+            stats.data = 'error';
+        }
+        
+        return stats;
     }
 
     // ===================
     // BACKUP & RESTORE
     // ===================
 
-    static exportAllData() {
+    static exportData() {
         const exportData = {
+            timestamp: new Date().toISOString(),
             version: '1.0',
-            exportDate: new Date().toISOString(),
-            data: {
-                trials: this.getTrials(),
-                entries: this.getEntries(),
-                scores: this.getScores(),
-                dogs: this.getDogs(),
-                handlers: this.getHandlers(),
-                settings: this.getSettings()
-            }
+            trials: this.getTrials(),
+            entries: this.getEntries(),
+            settings: this.getData(this.keys.SETTINGS, {})
         };
         
         return JSON.stringify(exportData, null, 2);
@@ -415,173 +332,29 @@ class DataManager {
 
     static importData(jsonData) {
         try {
-            const importData = JSON.parse(jsonData);
+            const data = JSON.parse(jsonData);
             
-            if (!importData.version || !importData.data) {
-                throw new Error('Invalid data format');
+            if (data.trials) {
+                this.saveData(this.keys.TRIALS, data.trials);
             }
             
-            // Backup current data
-            this.createBackup();
+            if (data.entries) {
+                this.saveData(this.keys.ENTRIES, data.entries);
+            }
             
-            // Import each data type
-            if (importData.data.trials) {
-                this.saveData(this.keys.TRIALS, importData.data.trials);
-            }
-            if (importData.data.entries) {
-                this.saveData(this.keys.ENTRIES, importData.data.entries);
-            }
-            if (importData.data.scores) {
-                this.saveData(this.keys.SCORES, importData.data.scores);
-            }
-            if (importData.data.dogs) {
-                this.saveData(this.keys.DOGS, importData.data.dogs);
-            }
-            if (importData.data.handlers) {
-                this.saveData(this.keys.HANDLERS, importData.data.handlers);
-            }
-            if (importData.data.settings) {
-                this.saveData(this.keys.SETTINGS, importData.data.settings);
+            if (data.settings) {
+                this.saveData(this.keys.SETTINGS, data.settings);
             }
             
             return { success: true, message: 'Data imported successfully' };
         } catch (error) {
-            return { success: false, message: 'Import failed: ' + error.message };
+            return { success: false, message: `Import failed: ${error.message}` };
         }
-    }
-
-    static createBackup() {
-        const backupKey = `cwags_backup_${Date.now()}`;
-        const backupData = this.exportAllData();
-        localStorage.setItem(backupKey, backupData);
-        
-        // Keep only last 5 backups
-        this.cleanupBackups();
-        
-        return backupKey;
-    }
-
-    static cleanupBackups() {
-        const keys = Object.keys(localStorage);
-        const backupKeys = keys.filter(key => key.startsWith('cwags_backup_'))
-            .sort((a, b) => {
-                const timeA = parseInt(a.split('_')[2]);
-                const timeB = parseInt(b.split('_')[2]);
-                return timeB - timeA; // Sort newest first
-            });
-        
-        // Remove all but the 5 most recent backups
-        backupKeys.slice(5).forEach(key => {
-            localStorage.removeItem(key);
-        });
-    }
-
-    static getBackups() {
-        const keys = Object.keys(localStorage);
-        return keys.filter(key => key.startsWith('cwags_backup_'))
-            .map(key => ({
-                key: key,
-                date: new Date(parseInt(key.split('_')[2])),
-                size: localStorage.getItem(key).length
-            }))
-            .sort((a, b) => b.date - a.date);
-    }
-
-    static restoreBackup(backupKey) {
-        const backupData = localStorage.getItem(backupKey);
-        if (!backupData) {
-            return { success: false, message: 'Backup not found' };
-        }
-        
-        return this.importData(backupData);
     }
 
     // ===================
-    // UTILITY METHODS
+    // UTILITY FUNCTIONS
     // ===================
-
-    static getData(key, defaultValue = null) {
-        try {
-            const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : defaultValue;
-        } catch (error) {
-            console.error('Error reading data:', error);
-            return defaultValue;
-        }
-    }
-
-    static saveData(key, data) {
-        try {
-            localStorage.setItem(key, JSON.stringify(data));
-            return true;
-        } catch (error) {
-            console.error('Error saving data:', error);
-            return false;
-        }
-    }
-
-    static generateId(prefix = 'item') {
-        const timestamp = Date.now();
-        const random = Math.random().toString(36).substr(2, 5);
-        return `${prefix}_${timestamp}_${random}`;
-    }
-
-    static saveAllPendingData() {
-        // Force save any pending data changes
-        // This is called on page unload
-        console.log('Saving all pending data...');
-    }
-
-    static migrateOldData() {
-        // Handle migration from older versions of the system
-        const version = this.getSetting('dataVersion');
-        if (!version || version < '1.0') {
-            this.performDataMigration();
-        }
-    }
-
-    static performDataMigration() {
-        console.log('Performing data migration...');
-        // Migration logic would go here
-        this.saveSetting('dataVersion', '1.0');
-    }
-
-    static clearAllData() {
-        if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
-            this.createBackup(); // Create backup before clearing
-            
-            Object.values(this.keys).forEach(key => {
-                localStorage.removeItem(key);
-            });
-            
-            return true;
-        }
-        return false;
-    }
-
-    static getStorageInfo() {
-        const usage = {};
-        let totalSize = 0;
-        
-        Object.entries(this.keys).forEach(([name, key]) => {
-            const data = localStorage.getItem(key);
-            const size = data ? data.length : 0;
-            usage[name] = {
-                key: key,
-                size: size,
-                sizeFormatted: this.formatBytes(size),
-                records: data ? JSON.parse(data).length || 1 : 0
-            };
-            totalSize += size;
-        });
-        
-        return {
-            usage: usage,
-            totalSize: totalSize,
-            totalSizeFormatted: this.formatBytes(totalSize),
-            available: this.getAvailableStorage()
-        };
-    }
 
     static formatBytes(bytes) {
         if (bytes === 0) return '0 Bytes';
@@ -591,83 +364,82 @@ class DataManager {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    static getAvailableStorage() {
+    static formatCurrency(amount) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(amount);
+    }
+
+    static validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    static sanitizeInput(input) {
+        if (typeof input !== 'string') return input;
+        return input.trim().replace(/[<>]/g, '');
+    }
+
+    // ===================
+    // DATA CLEANUP
+    // ===================
+
+    static cleanupOldData(daysOld = 365) {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+        
+        let removedCount = 0;
+        
+        // Clean old completed trials
+        const trials = this.getTrials();
+        const activTrials = trials.filter(trial => 
+            trial.status !== 'completed' || 
+            new Date(trial.date) > cutoffDate
+        );
+        removedCount += trials.length - activTrials.length;
+        this.saveData(this.keys.TRIALS, activTrials);
+        
+        // Clean entries for removed trials
+        const entries = this.getEntries();
+        const activeEntries = entries.filter(entry => 
+            activTrials.find(trial => trial.id === entry.trialId)
+        );
+        removedCount += entries.length - activeEntries.length;
+        this.saveData(this.keys.ENTRIES, activeEntries);
+        
+        return removedCount;
+    }
+
+    static validateDataIntegrity() {
+        const issues = [];
+        
         try {
-            const test = 'test';
-            localStorage.setItem(test, test);
-            localStorage.removeItem(test);
-            return 'Available';
-        } catch (e) {
-            return 'Storage Full';
-        }
-    }
-
-    // ===================
-    // VALIDATION METHODS
-    // ===================
-
-    static validateTrial(trial) {
-        const errors = [];
-        
-        if (!trial.name || trial.name.trim().length < 3) {
-            errors.push('Trial name must be at least 3 characters');
-        }
-        
-        if (!trial.date || new Date(trial.date) < new Date()) {
-            errors.push('Trial date must be in the future');
-        }
-        
-        if (!trial.host || trial.host.trim().length < 2) {
-            errors.push('Host name is required');
+            const trials = this.getTrials();
+            const entries = this.getEntries();
+            
+            // Check trial data
+            trials.forEach(trial => {
+                if (!trial.id || !trial.name) {
+                    issues.push(`Invalid trial: missing ID or name`);
+                }
+            });
+            
+            // Check entry data and references
+            entries.forEach(entry => {
+                if (!entry.id || !entry.trialId) {
+                    issues.push(`Invalid entry: missing ID or trial reference`);
+                }
+                
+                if (!trials.find(t => t.id === entry.trialId)) {
+                    issues.push(`Entry references non-existent trial: ${entry.trialId}`);
+                }
+            });
+            
+        } catch (error) {
+            issues.push(`Data validation error: ${error.message}`);
         }
         
-        if (!trial.location || trial.location.trim().length < 3) {
-            errors.push('Location is required');
-        }
-        
-        if (!trial.judges || trial.judges.length === 0) {
-            errors.push('At least one judge is required');
-        }
-        
-        if (!trial.classes || trial.classes.length === 0) {
-            errors.push('At least one class is required');
-        }
-        
-        return {
-            isValid: errors.length === 0,
-            errors: errors
-        };
-    }
-
-    static validateEntry(entry) {
-        const errors = [];
-        
-        if (!entry.handlerName || entry.handlerName.trim().length < 2) {
-            errors.push('Handler name is required');
-        }
-        
-        if (!entry.dogName || entry.dogName.trim().length < 2) {
-            errors.push('Dog name is required');
-        }
-        
-        if (!entry.registrationNumber || entry.registrationNumber.trim().length < 3) {
-            errors.push('Registration number is required');
-        }
-        
-        if (!entry.classes || entry.classes.length === 0) {
-            errors.push('At least one class must be selected');
-        }
-        
-        if (!entry.jumpHeight) {
-            errors.push('Jump height is required');
-        }
-        
-        return {
-            isValid: errors.length === 0,
-            errors: errors
-        };
+        return issues;
     }
 }
-
-// Initialize DataManager when script loads
-DataManager.init();
