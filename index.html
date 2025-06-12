@@ -168,63 +168,62 @@
 <script src="js/core/data-manager.js"></script>
 <script src="js/core/app.js"></script>
     
-    <!-- Module Scripts (loaded as needed) -->
-    <script src="js/modules/dashboard.js"></script>
-    <script src="js/modules/trial-setup.js"></script>
-    <script src="js/modules/entry-management.js"></script>
-    <script src="js/modules/paperwork-generator.js"></script>
-    <script src="js/modules/scoring-system.js"></script>
-    <script src="js/modules/admin-panel.js"></script>
+<!-- Module Scripts -->
+<script src="js/modules/dashboard.js"></script>
+<script src="js/modules/trial-setup.js"></script>
+<script src="js/modules/entry-management.js"></script>
+<script src="js/modules/paperwork-generator.js"></script>
+<script src="js/modules/scoring-system.js"></script>
+<script src="js/modules/admin-panel.js"></script>
 
-    <!-- Form Generators -->
-    <script src="js/forms/trial-application.js"></script>
-    <script src="js/forms/entry-forms.js"></script>
-    <script src="js/forms/score-sheets.js"></script>
-    <script src="js/forms/running-orders.js"></script>
-    <script src="js/forms/class-results.js"></script>
-    <script src="js/forms/judge-forms.js"></script>
-    <script src="js/forms/reports.js"></script>
+<!-- Form Generators -->
+<script src="js/forms/trial-application.js"></script>
+<script src="js/forms/judge-forms.js"></script>
+<script src="js/forms/premium-form.js"></script>
+<script src="js/forms/score-sheets.js"></script>
+<script src="js/forms/running-orders.js"></script>
+<script src="js/forms/class-results.js"></script>
 
-    <script>
+<script>
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Initializing C-WAGS Trial Management System...');
+        
+        // Check if user is already logged in
+        if (Auth.isLoggedIn()) {
+            showMainApp();
+        } else {
+            showAuthModal();
+        }
+        
         // Initialize the application
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing C-WAGS Trial Management System...');
-            
-            // Check if user is already logged in
-            if (Auth.isLoggedIn()) {
-                showMainApp();
-            } else {
-                showAuthModal();
-            }
-            
-            // Initialize the application
-            App.init();
-        });
+        App.init();
+    });
 
-        function showAuthModal() {
-            document.getElementById('auth-modal').style.display = 'flex';
-            document.getElementById('main-app').style.display = 'none';
-        }
+    function showAuthModal() {
+        document.getElementById('auth-modal').style.display = 'flex';
+        document.getElementById('main-app').style.display = 'none';
+    }
 
-        function showMainApp() {
-            document.getElementById('auth-modal').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            App.loadUserInterface();
-        }
+    function showMainApp() {
+        document.getElementById('auth-modal').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        App.loadUserInterface();
+    }
 
-        function showLoginForm() {
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('register-form').style.display = 'none';
-        }
+    function showLoginForm() {
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('register-form').style.display = 'none';
+    }
 
-        function showRegisterForm() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'block';
-        }
+    function showRegisterForm() {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('register-form').style.display = 'block';
+    }
 
-        function showForgotPassword() {
-            alert('Password reset functionality would be implemented here. Please contact your administrator.');
-        }
-    </script>
+    function showForgotPassword() {
+        alert('Password reset functionality would be implemented here. Please contact your administrator.');
+    }
+</script>
 </body>
 </html>
