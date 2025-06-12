@@ -1,31 +1,44 @@
-// js/core/auth.js
+// js/core/auth.js - Enhanced Authentication System
 class Auth {
+    static currentUser = null;
+    static sessionTimeout = 120; // minutes
+
     static init() {
+        console.log('🔐 Auth system initialized');
         this.setupEventListeners();
         this.loadStoredUsers();
+        this.startSessionCheck();
     }
 
     static setupEventListeners() {
         // Login form
-        document.getElementById('login-form-element').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleLogin();
-        });
+        const loginForm = document.getElementById('login-form-element');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin();
+            });
+        }
 
-        // Registration form
-        document.getElementById('register-form-element').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleRegister();
-        });
+        // Registration form (if exists)
+        const registerForm = document.getElementById('register-form-element');
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleRegister();
+            });
+        }
 
         // Logout button
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            this.logout();
-        });
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                this.logout();
+            });
+        }
     }
 
     static loadStoredUsers() {
-        // Load users from localStorage or create default admin
         let users = JSON.parse(localStorage.getItem('cwags_users') || '[]');
         
         // Create default admin if no users exist
@@ -33,7 +46,7 @@ class Auth {
             const defaultAdmin = {
                 id: 'admin-001',
                 email: 'admin@cwags.org',
-                password: this.hashPassword('admin123'), // In production, use proper hashing
+                password: this.hashPassword('admin123'),
                 firstName: 'System',
                 lastName: 'Administrator',
                 organization: 'C-WAGS',
@@ -45,7 +58,7 @@ class Auth {
             };
             users.push(defaultAdmin);
             localStorage.setItem('cwags_users', JSON.stringify(users));
-            console.log('Default admin created - Email: admin@cwags.org, Password: admin123');
+            console.log('✅ Default admin created - Email: admin@cwags.org, Password: admin123');
         }
     }
 
@@ -60,56 +73,77 @@ class Auth {
         }
 
         try {
+            // Add loading state
+            this.setLoginLoading(true);
+            
+            // Simulate network delay for better UX
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             const user = this.authenticateUser(email, password);
             if (user) {
                 this.loginUser(user, rememberMe);
-                showMainApp();
+                this.showSuccess('Login successful!');
+                
+                // Redirect after short delay
+                setTimeout(() => {
+                    if (typeof showMainApp === 'function') {
+                        showMainApp();
+                    }
+                }, 1000);
             } else {
                 this.showError('Invalid email or password');
             }
         } catch (error) {
-            this.showError('Login failed: ' + error.message);
+            this.showError('Login failed. Please try again.');
+            console.error('Login error:', error);
+        } finally {
+            this.setLoginLoading(false);
         }
     }
 
     static async handleRegister() {
-        const formData = {
-            firstName: document.getElementById('reg-first-name').value.trim(),
-            lastName: document.getElementById('reg-last-name').value.trim(),
-            email: document.getElementById('reg-email').value.trim(),
-            organization: document.getElementById('reg-organization').value.trim(),
-            phone: document.getElementById('reg-phone').value.trim(),
-            password: document.getElementById('reg-password').value,
-            confirmPassword: document.getElementById('reg-confirm-password').value,
-            role: document.getElementById('reg-role').value
-        };
+        const formData = new FormData(document.getElementById('register-form-element'));
+        const userData = Object.fromEntries(formData);
 
-        // Validation
-        if (!this.validateRegistration(formData)) {
+        if (!this.validateRegistrationData(userData)) {
             return;
         }
 
         try {
-            const newUser = this.createUser(formData);
-            this.showSuccess('Registration successful! Please login with your credentials.');
-            showLoginForm();
-            document.getElementById('register-form-element').reset();
+            this.setLoginLoading(true);
+            
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            const newUser = this.createUser(userData);
+            this.showSuccess('Account created successfully! Please login.');
+            
+            // Switch to login form
+            setTimeout(() => {
+                if (typeof showLoginForm === 'function') {
+                    showLoginForm();
+                }
+            }, 1500);
+            
         } catch (error) {
-            this.showError('Registration failed: ' + error.message);
+            this.showError('Registration failed. Please try again.');
+            console.error('Registration error:', error);
+        } finally {
+            this.setLoginLoading(false);
         }
     }
 
-    static validateRegistration(data) {
+    static validateRegistrationData(data) {
         // Check required fields
-        const required = ['firstName', 'lastName', 'email', 'organization', 'phone', 'password', 'role'];
+        const required = ['firstName', 'lastName', 'email', 'password', 'confirmPassword'];
         for (let field of required) {
-            if (!data[field]) {
-                this.showError(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+            if (!data[field] || data[field].trim() === '') {
+                this.showError(`${field.replace(/([A-Z])/g, ' $1').toLowerCase()} is required`);
                 return false;
             }
         }
 
-        // Check email format
+        // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(data.email)) {
             this.showError('Please enter a valid email address');
@@ -147,12 +181,12 @@ class Auth {
             password: this.hashPassword(data.password),
             firstName: data.firstName,
             lastName: data.lastName,
-            organization: data.organization,
-            phone: data.phone,
-            role: data.role,
+            organization: data.organization || '',
+            phone: data.phone || '',
+            role: data.role || 'host',
             isActive: true,
             createdAt: new Date().toISOString(),
-            permissions: this.getDefaultPermissions(data.role)
+            permissions: this.getDefaultPermissions(data.role || 'host')
         };
 
         users.push(newUser);
@@ -196,7 +230,8 @@ class Auth {
                 permissions: user.permissions
             },
             loginTime: new Date().toISOString(),
-            rememberMe: rememberMe
+            rememberMe: rememberMe,
+            expiresAt: new Date(Date.now() + (this.sessionTimeout * 60 * 1000)).toISOString()
         };
 
         // Store session
@@ -206,13 +241,21 @@ class Auth {
             sessionStorage.setItem('cwags_session', JSON.stringify(session));
         }
 
-        // Update user info in UI
+        this.currentUser = session.user;
         this.updateUserInterface(session.user);
     }
 
     static updateUserInterface(user) {
-        document.getElementById('user-name').textContent = `${user.firstName} ${user.lastName}`;
-        document.getElementById('user-role').textContent = user.role.toUpperCase();
+        const userNameEl = document.getElementById('user-name');
+        const userRoleEl = document.getElementById('user-role');
+        
+        if (userNameEl) {
+            userNameEl.textContent = `${user.firstName} ${user.lastName}`;
+        }
+        
+        if (userRoleEl) {
+            userRoleEl.textContent = user.role.toUpperCase();
+        }
 
         // Show/hide admin features
         const adminElements = document.querySelectorAll('.admin-only');
@@ -223,23 +266,48 @@ class Auth {
     }
 
     static logout() {
+        // Clear session data
         localStorage.removeItem('cwags_session');
         sessionStorage.removeItem('cwags_session');
-        showAuthModal();
+        this.currentUser = null;
+        
+        // Show login modal
+        if (typeof showAuthModal === 'function') {
+            showAuthModal();
+        }
         
         // Clear forms
-        document.getElementById('login-form-element').reset();
-        showLoginForm();
+        const loginForm = document.getElementById('login-form-element');
+        if (loginForm) {
+            loginForm.reset();
+        }
     }
 
     static isLoggedIn() {
+        if (this.currentUser) return true;
+        
         const session = this.getSession();
-        return session && session.user;
+        if (session && session.user) {
+            // Check if session is expired
+            if (session.expiresAt && new Date() > new Date(session.expiresAt)) {
+                this.logout();
+                return false;
+            }
+            
+            this.currentUser = session.user;
+            return true;
+        }
+        return false;
     }
 
     static getCurrentUser() {
-        const session = this.getSession();
-        return session ? session.user : null;
+        if (!this.currentUser) {
+            const session = this.getSession();
+            if (session && session.user) {
+                this.currentUser = session.user;
+            }
+        }
+        return this.currentUser;
     }
 
     static getSession() {
@@ -258,8 +326,50 @@ class Auth {
         return user.permissions.includes('all') || user.permissions.includes(permission);
     }
 
+    static startSessionCheck() {
+        // Check session validity every 5 minutes
+        setInterval(() => {
+            const session = this.getSession();
+            if (session && session.expiresAt) {
+                const timeLeft = new Date(session.expiresAt) - new Date();
+                
+                // Warn if less than 10 minutes left
+                if (timeLeft < 10 * 60 * 1000 && timeLeft > 0) {
+                    this.showSessionWarning();
+                } else if (timeLeft <= 0) {
+                    this.logout();
+                    this.showError('Session expired. Please login again.');
+                }
+            }
+        }, 5 * 60 * 1000); // 5 minutes
+    }
+
+    static showSessionWarning() {
+        const extend = confirm('Your session will expire soon. Do you want to extend it?');
+        if (extend) {
+            this.extendSession();
+        }
+    }
+
+    static extendSession() {
+        const session = this.getSession();
+        if (session) {
+            session.expiresAt = new Date(Date.now() + (this.sessionTimeout * 60 * 1000)).toISOString();
+            
+            if (session.rememberMe) {
+                localStorage.setItem('cwags_session', JSON.stringify(session));
+            } else {
+                sessionStorage.setItem('cwags_session', JSON.stringify(session));
+            }
+        }
+    }
+
+    // ===================
+    // PASSWORD UTILITIES
+    // ===================
+
     static hashPassword(password) {
-        // Simple hash for demo - in production use bcrypt or similar
+        // Simple hash for demo - use proper hashing in production
         let hash = 0;
         for (let i = 0; i < password.length; i++) {
             const char = password.charCodeAt(i);
@@ -273,8 +383,32 @@ class Auth {
         return this.hashPassword(password) === hash;
     }
 
+    // ===================
+    // UI UTILITIES
+    // ===================
+
+    static setLoginLoading(loading) {
+        const form = document.querySelector('.auth-form');
+        const submitBtn = document.querySelector('.auth-form .btn');
+        
+        if (form) {
+            if (loading) {
+                form.classList.add('loading');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Logging in...';
+                }
+            } else {
+                form.classList.remove('loading');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Login';
+                }
+            }
+        }
+    }
+
     static showError(message) {
-        // Create or update error message
         this.showMessage(message, 'error');
     }
 
@@ -283,27 +417,24 @@ class Auth {
     }
 
     static showMessage(message, type) {
-        // Remove existing messages
-        const existingMessages = document.querySelectorAll('.auth-message');
-        existingMessages.forEach(msg => msg.remove());
-
-        // Create new message
-        const messageEl = document.createElement('div');
-        messageEl.className = `auth-message auth-${type}`;
-        messageEl.textContent = message;
-
-        // Insert into current form
-        const activeForm = document.querySelector('.auth-form:not([style*="display: none"])');
-        if (activeForm) {
-            activeForm.insertBefore(messageEl, activeForm.querySelector('form'));
+        const messageArea = document.getElementById('message-area');
+        if (messageArea) {
+            const className = type === 'error' ? 'auth-error' : 'auth-success';
+            messageArea.innerHTML = `<div class="${className}">${message}</div>`;
+            
+            // Auto-clear success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageArea.innerHTML = '';
+                }, 3000);
+            }
         }
+    }
 
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            messageEl.remove();
-        }, 5000);
+    static clearMessages() {
+        const messageArea = document.getElementById('message-area');
+        if (messageArea) {
+            messageArea.innerHTML = '';
+        }
     }
 }
-
-// Initialize authentication when script loads
-Auth.init();
