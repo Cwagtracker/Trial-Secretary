@@ -83,222 +83,51 @@
         </main>
     </div>
 
-    <script>
-        // Simple Authentication System
-        class SimpleAuth {
-            static users = [
-                {
-                    id: 'admin-001',
-                    email: 'admin@cwags.org',
-                    password: 'admin123',
-                    firstName: 'System',
-                    lastName: 'Administrator',
-                    role: 'admin'
-                }
-            ];
-
-            static currentUser = null;
-
-            static login(email, password) {
-                const user = this.users.find(u => 
-                    u.email.toLowerCase() === email.toLowerCase() && 
-                    u.password === password
-                );
-                
-                if (user) {
-                    this.currentUser = user;
-                    localStorage.setItem('cwags_current_user', JSON.stringify(user));
-                    return true;
-                }
-                return false;
-            }
-
-            static logout() {
-                this.currentUser = null;
-                localStorage.removeItem('cwags_current_user');
-            }
-
-            static isLoggedIn() {
-                if (this.currentUser) return true;
-                
-                const stored = localStorage.getItem('cwags_current_user');
-                if (stored) {
-                    this.currentUser = JSON.parse(stored);
-                    return true;
-                }
-                return false;
-            }
-
-            static getCurrentUser() {
-                return this.currentUser;
-            }
-        }
-
-        // Simple App Controller
-        class SimpleApp {
-            static init() {
-                this.setupEventListeners();
-                this.checkLoginStatus();
-            }
-
-            static setupEventListeners() {
-                // Login form
-                document.getElementById('login-form-element').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.handleLogin();
-                });
-
-                // Logout button
-                document.getElementById('logout-btn').addEventListener('click', () => {
-                    this.handleLogout();
-                });
-
-                // Navigation buttons
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        this.switchModule(e.target.dataset.module);
-                        // Update active state
-                        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                        e.target.classList.add('active');
-                    });
-                });
-            }
-
-            static handleLogin() {
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-
-                if (SimpleAuth.login(email, password)) {
-                    this.showMessage('Login successful!', 'success');
-                    setTimeout(() => {
-                        this.showMainApp();
-                    }, 1000);
-                } else {
-                    this.showMessage('Invalid email or password', 'error');
-                }
-            }
-
-            static handleLogout() {
-                SimpleAuth.logout();
-                this.showAuthModal();
-            }
-
-            static checkLoginStatus() {
-                if (SimpleAuth.isLoggedIn()) {
-                    this.showMainApp();
-                } else {
-                    this.showAuthModal();
-                }
-            }
-
-            static showAuthModal() {
-                document.getElementById('auth-modal').style.display = 'flex';
-                document.getElementById('main-app').style.display = 'none';
-                this.clearMessages();
-            }
-
-            static showMainApp() {
-                document.getElementById('auth-modal').style.display = 'none';
-                document.getElementById('main-app').style.display = 'block';
-                
-                const user = SimpleAuth.getCurrentUser();
-                if (user) {
-                    document.getElementById('user-name').textContent = `${user.firstName} ${user.lastName}`;
-                }
-            }
-
-            static switchModule(moduleName) {
-                const container = document.getElementById('module-container');
-                
-                switch(moduleName) {
-                    case 'dashboard':
-                        container.innerHTML = `
-                            <div class="dashboard-module">
-                                <h2>📊 Dashboard</h2>
-                                <p>Welcome to the C-WAGS Trial Management System dashboard.</p>
-                                <div style="margin-top: 20px;">
-                                    <h3>Quick Stats:</h3>
-                                    <ul>
-                                        <li>Total Trials: 0</li>
-                                        <li>Total Entries: 0</li>
-                                        <li>Active Users: 1</li>
-                                        <li>System Status: ✅ Operational</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        `;
-                        break;
-                    case 'trial-setup':
-                        container.innerHTML = `
-                            <div class="module">
-                                <h2>🎯 Trial Setup</h2>
-                                <p>Create and manage C-WAGS trials.</p>
-                                <p><em>This module is ready for development.</em></p>
-                            </div>
-                        `;
-                        break;
-                    case 'entries':
-                        container.innerHTML = `
-                            <div class="module">
-                                <h2>📝 Entry Management</h2>
-                                <p>Manage trial entries and registrations.</p>
-                                <p><em>This module is ready for development.</em></p>
-                            </div>
-                        `;
-                        break;
-                    case 'paperwork':
-                        container.innerHTML = `
-                            <div class="module">
-                                <h2>📄 Paperwork Generation</h2>
-                                <p>Generate trial forms and documents.</p>
-                                <p><em>This module is ready for development.</em></p>
-                            </div>
-                        `;
-                        break;
-                    case 'scoring':
-                        container.innerHTML = `
-                            <div class="module">
-                                <h2>🏆 Scoring & Results</h2>
-                                <p>Manage scoring and generate results.</p>
-                                <p><em>This module is ready for development.</em></p>
-                            </div>
-                        `;
-                        break;
-                    case 'admin':
-                        container.innerHTML = `
-                            <div class="module">
-                                <h2>⚙️ Admin Panel</h2>
-                                <p>System administration and user management.</p>
-                                <p><em>This module is ready for development.</em></p>
-                            </div>
-                        `;
-                        break;
-                    default:
-                        container.innerHTML = `
-                            <div class="module">
-                                <h2>Module Not Found</h2>
-                                <p>The requested module "${moduleName}" could not be loaded.</p>
-                            </div>
-                        `;
-                }
-            }
-
-            static showMessage(message, type) {
-                const messageArea = document.getElementById('message-area');
-                messageArea.innerHTML = `<div class="${type}-message">${message}</div>`;
-            }
-
-            static clearMessages() {
-                document.getElementById('message-area').innerHTML = '';
-            }
-        }
-
-        // Initialize the application when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initializing C-WAGS Trial Management System...');
-            SimpleApp.init();
-            console.log('✅ System initialized successfully!');
+  <script>
+    // Load core modules first
+    const loadScript = (src) => {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
         });
-    </script>
-</body>
-</html>
+    };
+
+    // Enhanced App Controller that works with the new modules
+    class EnhancedApp {
+        static async init() {
+            console.log('🚀 Loading enhanced C-WAGS system...');
+            
+            // Initialize core systems
+            DataManager.init();
+            Auth.init();
+            
+            this.setupEventListeners();
+            this.checkLoginStatus();
+        }
+
+        static setupEventListeners() {
+            // Navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    this.switchModule(e.target.dataset.module);
+                    // Update active state
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                });
+            });
+
+            // Handle data changes
+            window.addEventListener('cwagsDataChanged', (e) => {
+                console.log('Data changed:', e.detail);
+                // Refresh current view if needed
+                this.refreshCurrentView();
+            });
+        }
+
+        static checkLoginStatus() {
+            if (Auth.isLoggedIn()) {
+                showMainApp();
+                this.update
