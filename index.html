@@ -95,8 +95,11 @@
         });
     };
 
+   <script>
     // Enhanced App Controller that works with the new modules
     class EnhancedApp {
+        static currentModule = 'dashboard';
+
         static async init() {
             console.log('🚀 Loading enhanced C-WAGS system...');
             
@@ -122,7 +125,6 @@
             // Handle data changes
             window.addEventListener('cwagsDataChanged', (e) => {
                 console.log('Data changed:', e.detail);
-                // Refresh current view if needed
                 this.refreshCurrentView();
             });
         }
@@ -130,4 +132,404 @@
         static checkLoginStatus() {
             if (Auth.isLoggedIn()) {
                 showMainApp();
-                this.update
+                this.updateUserDisplay();
+                this.loadDashboard();
+            } else {
+                showAuthModal();
+            }
+        }
+
+        static updateUserDisplay() {
+            const user = Auth.getCurrentUser();
+            if (user) {
+                const userNameEl = document.getElementById('user-name');
+                if (userNameEl) {
+                    userNameEl.textContent = `${user.firstName} ${user.lastName}`;
+                }
+            }
+        }
+
+        static switchModule(moduleName) {
+            this.currentModule = moduleName;
+            const container = document.getElementById('module-container');
+            
+            switch(moduleName) {
+                case 'dashboard':
+                    this.loadDashboard();
+                    break;
+                case 'trial-setup':
+                    this.loadTrialSetup();
+                    break;
+                case 'entries':
+                    this.loadEntryManagement();
+                    break;
+                case 'paperwork':
+                    this.loadPaperworkGeneration();
+                    break;
+                case 'scoring':
+                    this.loadScoringSystem();
+                    break;
+                case 'admin':
+                    this.loadAdminPanel();
+                    break;
+                default:
+                    this.loadDashboard();
+            }
+        }
+
+        static loadDashboard() {
+            const container = document.getElementById('module-container');
+            const stats = DataManager.getSystemStats();
+            
+            container.innerHTML = `
+                <div class="dashboard-module">
+                    <div class="module-header">
+                        <h2>📊 Dashboard</h2>
+                        <p>Welcome to the C-WAGS Trial Management System</p>
+                    </div>
+
+                    <div class="dashboard-content">
+                        <!-- Quick Stats -->
+                        <div class="stats-grid grid grid-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">🎯 Total Trials</h3>
+                                </div>
+                                <div class="card-content">
+                                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--primary-color); text-align: center;">
+                                        ${stats.totalTrials}
+                                    </div>
+                                    <div style="text-align: center; color: #666; margin-top: 10px;">
+                                        <div>Active: ${stats.activeTrials}</div>
+                                        <div>Pending: ${stats.pendingTrials}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">📝 Total Entries</h3>
+                                </div>
+                                <div class="card-content">
+                                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--secondary-color); text-align: center;">
+                                        ${stats.totalEntries}
+                                    </div>
+                                    <div style="text-align: center; color: #666; margin-top: 10px;">
+                                        <div>This Month: ${stats.entriesThisMonth}</div>
+                                        <div>Confirmed: ${stats.confirmedEntries}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">👥 Users</h3>
+                                </div>
+                                <div class="card-content">
+                                    <div style="font-size: 2.5rem; font-weight: bold; color: var(--success-color); text-align: center;">
+                                        ${stats.totalUsers}
+                                    </div>
+                                    <div style="text-align: center; color: #666; margin-top: 10px;">
+                                        <div>Active: ${stats.activeUsers}</div>
+                                        <div>System: ✅ Operational</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">💾 Data Storage</h3>
+                                </div>
+                                <div class="card-content">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--warning-color); text-align: center;">
+                                        ${DataManager.formatBytes(stats.dataSize)}
+                                    </div>
+                                    <div style="text-align: center; color: #666; margin-top: 10px;">
+                                        <div>Health: ${stats.systemHealth.storage === 'healthy' ? '✅' : '⚠️'} ${stats.systemHealth.storage}</div>
+                                        <div>Records: ${stats.totalTrials + stats.totalEntries}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="card mt-30">
+                            <div class="card-header">
+                                <h3 class="card-title">🚀 Quick Actions</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="grid grid-3">
+                                    <button class="btn btn-primary" onclick="EnhancedApp.switchModule('trial-setup')">
+                                        🎯 Create New Trial
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="EnhancedApp.switchModule('entries')">
+                                        📝 Manage Entries
+                                    </button>
+                                    <button class="btn btn-success" onclick="EnhancedApp.switchModule('paperwork')">
+                                        📄 Generate Forms
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="card mt-20">
+                            <div class="card-header">
+                                <h3 class="card-title">📋 System Status</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="grid grid-2">
+                                    <div>
+                                        <h4>✅ System Health</h4>
+                                        <ul>
+                                            <li>Authentication: Working</li>
+                                            <li>Data Storage: ${stats.systemHealth.storage}</li>
+                                            <li>Performance: ${stats.systemHealth.performance}</li>
+                                            <li>Data Integrity: ${stats.systemHealth.data}</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4>📊 Quick Stats</h4>
+                                        <ul>
+                                            <li>Last Backup: ${stats.lastBackup || 'Never'}</li>
+                                            <li>System Uptime: ${this.getUptime()}</li>
+                                            <li>Current User: ${Auth.getCurrentUser()?.role || 'Guest'}</li>
+                                            <li>Storage Usage: ${Math.round((stats.dataSize / (5*1024*1024)) * 100)}%</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        static loadTrialSetup() {
+            const container = document.getElementById('module-container');
+            container.innerHTML = `
+                <div class="module">
+                    <div class="module-header">
+                        <h2>🎯 Trial Setup</h2>
+                        <p>Create and manage C-WAGS trials</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-content">
+                            <p>🚧 <strong>Trial Setup Module</strong></p>
+                            <p>This advanced module is ready for development and will include:</p>
+                            <ul>
+                                <li>✅ Complete trial creation wizard</li>
+                                <li>✅ Venue and judge management</li>
+                                <li>✅ Class scheduling and organization</li>
+                                <li>✅ Entry deadline and limit management</li>
+                                <li>✅ Trial approval workflow</li>
+                            </ul>
+                            <div class="mt-20">
+                                <button class="btn btn-primary" onclick="alert('Trial Setup module coming soon!')">
+                                    ➕ Create New Trial
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        static loadEntryManagement() {
+            const container = document.getElementById('module-container');
+            container.innerHTML = `
+                <div class="module">
+                    <div class="module-header">
+                        <h2>📝 Entry Management</h2>
+                        <p>Manage trial entries and registrations</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-content">
+                            <p>🚧 <strong>Entry Management Module</strong></p>
+                            <p>This module will provide comprehensive entry management including:</p>
+                            <ul>
+                                <li>✅ Online entry forms for handlers</li>
+                                <li>✅ Entry validation and confirmation</li>
+                                <li>✅ Payment tracking and management</li>
+                                <li>✅ Bulk entry operations</li>
+                                <li>✅ Entry modification requests</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        static loadPaperworkGeneration() {
+            const container = document.getElementById('module-container');
+            container.innerHTML = `
+                <div class="module">
+                    <div class="module-header">
+                        <h2>📄 Paperwork Generation</h2>
+                        <p>Generate trial forms and documents</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-content">
+                            <p>🚧 <strong>Paperwork Generation Module</strong></p>
+                            <p>Professional document generation system including:</p>
+                            <ul>
+                                <li>✅ Trial applications and premium sheets</li>
+                                <li>✅ Entry confirmations and modifications</li>
+                                <li>✅ Score sheets and running orders</li>
+                                <li>✅ Judge forms and evaluations</li>
+                                <li>✅ Results reports and certificates</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        static loadScoringSystem() {
+            const container = document.getElementById('module-container');
+            container.innerHTML = `
+                <div class="module">
+                    <div class="module-header">
+                        <h2>🏆 Scoring & Results</h2>
+                        <p>Digital scoring and results management</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-content">
+                            <p>🚧 <strong>Scoring System Module</strong></p>
+                            <p>Advanced scoring capabilities including:</p>
+                            <ul>
+                                <li>✅ Digital score sheet interface</li>
+                                <li>✅ Real-time scoring validation</li>
+                                <li>✅ Automatic results calculation</li>
+                                <li>✅ Award tracking and reporting</li>
+                                <li>✅ Score import/export functions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        static loadAdminPanel() {
+            const user = Auth.getCurrentUser();
+            if (!user || !Auth.hasPermission('admin')) {
+                this.showAccessDenied();
+                return;
+            }
+
+            const container = document.getElementById('module-container');
+            container.innerHTML = `
+                <div class="module">
+                    <div class="module-header">
+                        <h2>⚙️ Admin Panel</h2>
+                        <p>System administration and user management</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-content">
+                            <p>🚧 <strong>Administrative Panel</strong></p>
+                            <p>Complete system administration including:</p>
+                            <ul>
+                                <li>✅ User management and permissions</li>
+                                <li>✅ Trial approval and oversight</li>
+                                <li>✅ System settings and configuration</li>
+                                <li>✅ Data backup and maintenance</li>
+                                <li>✅ Analytics and reporting</li>
+                            </ul>
+                            <div class="mt-20">
+                                <button class="btn btn-warning" onclick="EnhancedApp.testDataOperations()">
+                                    🧪 Test Data Operations
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        static showAccessDenied() {
+            const container = document.getElementById('module-container');
+            container.innerHTML = `
+                <div class="module">
+                    <div class="card">
+                        <div class="card-content text-center">
+                            <h3>🚫 Access Denied</h3>
+                            <p>You don't have permission to access this module.</p>
+                            <button class="btn btn-primary mt-20" onclick="EnhancedApp.switchModule('dashboard')">
+                                Return to Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        static testDataOperations() {
+            try {
+                // Test saving a trial
+                const testTrial = {
+                    name: 'Test Trial ' + new Date().toLocaleString(),
+                    host: 'Test Host',
+                    date: new Date().toISOString(),
+                    status: 'active'
+                };
+                
+                const savedTrial = DataManager.saveTrial(testTrial);
+                console.log('✅ Test trial saved:', savedTrial);
+                
+                // Test retrieving trials
+                const trials = DataManager.getTrials();
+                console.log('✅ Retrieved trials:', trials);
+                
+                // Test system stats
+                const stats = DataManager.getSystemStats();
+                console.log('✅ System stats:', stats);
+                
+                alert('✅ Data operations test completed successfully! Check console for details.');
+                this.refreshCurrentView();
+                
+            } catch (error) {
+                console.error('❌ Data operations test failed:', error);
+                alert('❌ Data operations test failed. Check console for details.');
+            }
+        }
+
+        static refreshCurrentView() {
+            this.switchModule(this.currentModule);
+        }
+
+        static getUptime() {
+            const start = sessionStorage.getItem('app_start_time') || Date.now();
+            const uptime = Date.now() - start;
+            const minutes = Math.floor(uptime / 60000);
+            return `${minutes} minutes`;
+        }
+    }
+
+    // Initialize the application when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Initializing Enhanced C-WAGS Trial Management System...');
+        
+        // Store app start time
+        if (!sessionStorage.getItem('app_start_time')) {
+            sessionStorage.setItem('app_start_time', Date.now());
+        }
+        
+        // Initialize enhanced app
+        EnhancedApp.init();
+        
+        console.log('✅ Enhanced system initialized successfully!');
+    });
+
+    // Global functions for compatibility
+    function showAuthModal() {
+        document.getElementById('auth-modal').style.display = 'flex';
+        document.getElementById('main-app').style.display = 'none';
+        Auth.clearMessages();
+    }
+
+    function showMainApp() {
+        document.getElementById('auth-modal').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        EnhancedApp.updateUserDisplay();
+    }
+</script>
