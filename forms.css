@@ -1,0 +1,1155 @@
+/* css/forms.css - Form Styling & Print Layouts */
+
+/* ===================
+   FORM LAYOUTS
+   =================== */
+
+.cwags-form {
+    background: var(--white);
+    padding: 20px;
+    margin: 20px 0;
+    border: 2px solid #000;
+    font-family: 'Arial', sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    page-break-after: always;
+}
+
+.cwags-form h1,
+.cwags-form h2,
+.cwags-form h3 {
+    color: #000;
+    margin-bottom: 10px;
+}
+
+.cwags-form h1 {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.cwags-form h2 {
+    font-size: 16px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 5px;
+}
+
+.cwags-form h3 {
+    font-size: 14px;
+}
+
+/* ===================
+   SCORE SHEETS
+   =================== */
+
+.score-sheet {
+    min-height: 11in;
+    width: 8.5in;
+    margin: 0 auto;
+}
+
+.score-sheet-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+}
+
+.header-left,
+.header-center,
+.header-right {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-center {
+    text-align: center;
+    align-items: center;
+}
+
+.header-right {
+    text-align: right;
+    align-items: flex-end;
+}
+
+.placing-section {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.basic-info .info-line,
+.competitor-info .info-line {
+    margin-bottom: 8px;
+}
+
+.cwags-logo-area {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.level-info,
+.division-info {
+    font-size: 12px;
+    margin-bottom: 3px;
+}
+
+.reg-number {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.dog-handler {
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.version-info {
+    text-align: right;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+/* Score Table */
+.score-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 11px;
+}
+
+.score-table th,
+.score-table td {
+    border: 1px solid #000;
+    padding: 8px 4px;
+    text-align: center;
+    vertical-align: top;
+}
+
+.score-table th {
+    background: #f0f0f0;
+    font-weight: bold;
+    font-size: 10px;
+}
+
+.exercise-col { width: 25%; text-align: left; }
+.nq-col { width: 12%; }
+.major-col { width: 12%; }
+.minor-col { width: 12%; }
+.slight-col { width: 12%; }
+.max-col { width: 8%; }
+.lost-col { width: 8%; }
+.net-col { width: 11%; }
+
+.exercise-name {
+    text-align: left;
+    font-weight: bold;
+}
+
+.exercise-name small {
+    font-weight: normal;
+    font-style: italic;
+}
+
+.deduction-cell {
+    font-size: 10px;
+    text-align: left;
+    padding: 4px;
+}
+
+.max-points,
+.points-lost,
+.net-score {
+    font-weight: bold;
+    background: #f9f9f9;
+}
+
+.total-row {
+    background: #e9e9e9;
+    font-weight: bold;
+    border-top: 2px solid #000;
+}
+
+.score-summary {
+    margin-top: 20px;
+    border-top: 1px solid #000;
+    padding-top: 15px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.summary-item {
+    flex: 1;
+}
+
+.signature-area {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #000;
+}
+
+.signature-line {
+    margin-bottom: 10px;
+}
+
+.class-notes {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ccc;
+    font-size: 10px;
+}
+
+/* ===================
+   RUNNING ORDERS
+   =================== */
+
+.running-order-sheet {
+    min-height: 11in;
+    width: 8.5in;
+    margin: 0 auto;
+}
+
+.running-order-header {
+    margin-bottom: 20px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 15px;
+}
+
+.header-row-1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.trial-info h2 {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.trial-info h3 {
+    font-size: 16px;
+    color: #666;
+}
+
+.cwags-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logo-image {
+    height: 50px;
+    width: auto;
+    margin-bottom: 5px;
+}
+
+.logo-text {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.class-details {
+    margin-top: 10px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.detail-item {
+    flex: 1;
+    font-size: 12px;
+}
+
+.running-order-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.running-order-table th,
+.running-order-table td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: left;
+}
+
+.running-order-table th {
+    background: #f0f0f0;
+    font-weight: bold;
+    text-align: center;
+}
+
+.order-col { width: 8%; text-align: center; }
+.reg-col { width: 15%; }
+.name-col { width: 15%; }
+.handler-col { width: 25%; }
+.height-col { width: 10%; text-align: center; }
+.type-col { width: 10%; text-align: center; }
+.notes-col { width: 17%; }
+
+.order-number {
+    font-weight: bold;
+    text-align: center;
+}
+
+.feo-entry {
+    background: #fff3cd;
+}
+
+.running-order-footer {
+    margin-top: 30px;
+    border-top: 1px solid #000;
+    padding-top: 15px;
+}
+
+.footer-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.entry-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-item {
+    font-size: 12px;
+}
+
+.height-breakdown {
+    font-size: 12px;
+}
+
+.instructions {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #ccc;
+}
+
+.instructions h4 {
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+.instructions ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.instructions li {
+    margin-bottom: 5px;
+    font-size: 11px;
+}
+
+.signatures {
+    margin-top: 20px;
+}
+
+.signature-line {
+    margin-bottom: 15px;
+    font-size: 12px;
+}
+
+/* ===================
+   CLASS RESULTS
+   =================== */
+
+.class-results-report {
+    min-height: 11in;
+    width: 8.5in;
+    margin: 0 auto;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 15px;
+}
+
+.cwags-logo-section {
+    flex: 0 0 auto;
+}
+
+.results-logo {
+    height: 60px;
+    width: auto;
+}
+
+.results-title {
+    flex: 1;
+    text-align: center;
+}
+
+.results-title h2 {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.trial-info-section {
+    margin-bottom: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.info-item {
+    flex: 1;
+    font-size: 12px;
+}
+
+.instructions {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ccc;
+    font-size: 11px;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 11px;
+}
+
+.results-table th,
+.results-table td {
+    border: 1px solid #000;
+    padding: 6px;
+    text-align: center;
+}
+
+.results-table th {
+    background: #f0f0f0;
+    font-weight: bold;
+}
+
+.entry-num-col { width: 5%; }
+.reg-num-col { width: 15%; }
+.dog-name-col { width: 15%; }
+.handler-col { width: 20%; }
+.round-col { width: 9%; }
+
+.entry-number {
+    font-weight: bold;
+}
+
+.feo-entry {
+    background: #fff3cd;
+}
+
+.empty-row td {
+    height: 25px;
+}
+
+.results-footer {
+    margin-top: 30px;
+    border-top: 1px solid #000;
+    padding-top: 15px;
+}
+
+.completion-info {
+    display: flex;
+    justify-content: space-between;
+}
+
+.signature-line {
+    font-size: 12px;
+}
+
+/* Reset Section for Scent Classes */
+.reset-section {
+    margin-top: 30px;
+    border-top: 1px solid #000;
+    padding-top: 15px;
+}
+
+.reset-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 11px;
+}
+
+.reset-table th,
+.reset-table td {
+    border: 1px solid #000;
+    padding: 6px;
+    text-align: center;
+}
+
+.reset-col { width: 12%; }
+
+.reset-judges {
+    margin-top: 10px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* ===================
+   JUDGE FORMS
+   =================== */
+
+.judge-signature-page {
+    min-height: 11in;
+    width: 8.5in;
+    margin: 0 auto;
+}
+
+.signature-page-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 20px;
+}
+
+.header-logo {
+    margin-right: 20px;
+}
+
+.signature-logo {
+    height: 60px;
+    width: auto;
+}
+
+.header-title {
+    flex: 1;
+}
+
+.header-title h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.header-title p {
+    font-size: 12px;
+    color: #666;
+}
+
+.signature-blocks {
+    display: grid;
+    gap: 30px;
+}
+
+.judge-signature-block {
+    border: 1px solid #000;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.judge-block-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 10px;
+}
+
+.judge-name {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.judge-signature-area {
+    font-size: 12px;
+}
+
+.class-signature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.class-signature-cell {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+    min-height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.class-label {
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* ===================
+   TRIAL APPLICATION
+   =================== */
+
+.trial-application {
+    min-height: 11in;
+    width: 8.5in;
+    margin: 0 auto;
+}
+
+.application-header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 20px;
+}
+
+.application-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.application-subtitle {
+    font-size: 14px;
+    color: #666;
+}
+
+.application-form {
+    display: grid;
+    gap: 20px;
+}
+
+.form-section {
+    border: 1px solid #000;
+    padding: 15px;
+}
+
+.section-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+.form-field {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.field-label {
+    min-width: 120px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.field-value {
+    flex: 1;
+    border-bottom: 1px solid #000;
+    min-height: 18px;
+    font-size: 12px;
+}
+
+.checkbox-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-item input[type="checkbox"] {
+    transform: scale(1.2);
+}
+
+.class-schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.class-schedule-table th,
+.class-schedule-table td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: center;
+}
+
+.class-schedule-table th {
+    background: #f0f0f0;
+    font-weight: bold;
+}
+
+/* ===================
+   DIGITAL FORMS
+   =================== */
+
+.paperwork-module {
+    padding: 30px;
+}
+
+.paperwork-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.paperwork-section {
+    background: var(--light-bg);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.paperwork-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.category-card {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid var(--secondary-color);
+}
+
+.category-card h4 {
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.form-list {
+    display: grid;
+    gap: 10px;
+}
+
+.form-btn {
+    padding: 12px;
+    background: var(--light-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    text-align: left;
+}
+
+.form-btn:hover {
+    background: var(--secondary-color);
+    color: var(--white);
+    border-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.generation-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+    padding: 20px;
+    background: var(--light-bg);
+    border-radius: 8px;
+}
+
+.options-group,
+.output-options {
+    background: var(--white);
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.options-group h4,
+.output-options h4 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.options-group label,
+.output-options label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.options-group input,
+.output-options input {
+    margin-right: 8px;
+    width: auto;
+}
+
+/* ===================
+   MODAL FORMS
+   =================== */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content.large {
+    max-width: 1200px;
+}
+
+.modal-header {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 20px;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.close {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.close:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.preview-toolbar {
+    padding: 15px;
+    background: var(--light-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.preview-content {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* ===================
+   DASHBOARD CARDS
+   =================== */
+
+.dashboard-module {
+    padding: 30px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-left: 4px solid var(--secondary-color);
+}
+
+.stat-icon {
+    font-size: 2rem;
+}
+
+.stat-content h3 {
+    font-size: 2rem;
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.stat-content p {
+    margin: 5px 0 0 0;
+    color: var(--dark-gray);
+    font-size: 14px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.dashboard-card {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.badge {
+    background: var(--warning-color);
+    color: var(--white);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--light-bg);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.item:hover {
+    background: var(--secondary-color);
+    color: var(--white);
+    transform: translateY(-2px);
+}
+
+.item-content {
+    flex: 1;
+}
+
+.item-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.item-meta {
+    font-size: 12px;
+    color: var(--dark-gray);
+}
+
+.item:hover .item-meta {
+    color: rgba(255,255,255,0.8);
+}
+
+.item-status,
+.item-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-xs {
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background: var(--light-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+.action-btn:hover {
+    background: var(--secondary-color);
+    color: var(--white);
+    border-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.action-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.action-text {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ===================
+   PRINT STYLES
+   =================== */
+
+@media print {
+    .no-print,
+    .nav-tabs,
+    .btn,
+    .module-header,
+    .preview-toolbar,
+    .generation-options,
+    .paperwork-section,
+    .dashboard-grid {
+        display: none !important;
+    }
+    
+    .cwags-form {
+        margin: 0;
+        padding: 0.5in;
+        border: none;
+        page-break-after: always;
+        box-shadow: none;
+    }
+    
+    .cwags-form:last-child {
+        page-break-after: avoid;
+    }
+    
+    .page-break {
+        page-break-after: always;
+    }
+    
+    body {
+        font-size: 12pt;
+        line-height: 1.4;
+        color: #000;
+        background: #fff;
+    }
+    
+    .score-table,
+    .running-order-table,
+    .results-table {
+        font-size: 10pt;
+    }
+    
+    .score-table th,
+    .score-table td,
+    .running-order-table th,
+    .running-order-table td,
+    .results-table th,
+    .results-table td {
+        border: 1pt solid #000;
+        padding: 4pt;
+    }
+    
+    .signature-line {
+        border-bottom: 1pt solid #000;
+        min-height: 20pt;
+    }
+}
+
+/* ===================
+   RESPONSIVE DESIGN
+   =================== */
+
+@media (max-width: 768px) {
+    .paperwork-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .score-sheet-header,
+    .running-order-header .header-row-1 {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .generation-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+}
